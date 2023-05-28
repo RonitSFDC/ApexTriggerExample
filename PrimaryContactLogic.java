@@ -5,13 +5,13 @@ trigger PrimaryContact on Contact(after update) {
     List<Contact> listOfContacts = new List<Contact>();
     Map<Id, Contact> accIdConMap = new Map<Id, Contact>();
     Set<Id> contactId = new Set<Id>();
-    set<Id> processedUpdateConId = new Set<Id>();
+    set<Id> processedUpdateConId = new Set<Id>(); // Recursive trigger prevention logic
     if(trigger.isAfter && trigger.isUpdate ) {
         for(Contact con: trigger.new) {
             System.debug('processedUpdateConId : '+ processedUpdateConId);
             if(!processedUpdateConId.contains(con.Id)) {
             if(con.AccountId != null && con.Primary_Contact__c == true) {
-                contactId.add(con.Id);
+                contactId.add(con.Id); // adding contact id to check further with current contact record
                 accIdConMap.put(con.AccountId, con);
                 System.debug(accIdConMap);
                 
@@ -21,11 +21,13 @@ trigger PrimaryContact on Contact(after update) {
        
         List<Contact> accountList = [SELECT Id,AccountId, Name, Primary_Contact__c FROM Contact WHERE Primary_Contact__c = true AND AccountID IN :accIdConMap.keySet()];
         for(Contact con1 : accountList ) {
+            // to check if current contact id should not same with old contact id
             if(!contactId.contains(con1.Id)) {
                 Contact c = new Contact();
                 c.Id = con1.Id;
                 c.Primary_Contact__c  = false;
                 listOfContacts.add(c);
+                // Recursive trigger prevention logic
                 processedUpdateConId.add(con1.Id);
             }
             
