@@ -32,3 +32,20 @@ public with sharing class CSVFileReader {
         return csvLines;
     }
 }
+
+
+public class CustomObjectDataController {
+    public Blob csvFile { get; private set; }
+
+    public PageReference generateCSV() {
+        CustomObjectDataToCSV.exportToCSV();
+        Attachment attachment = [SELECT Body FROM Attachment WHERE Name = 'CustomObjectData.csv' LIMIT 1];
+        csvFile = attachment.Body;
+
+        // Delete the attachment after generating the CSV file
+        delete attachment;
+
+        return null;
+    }
+}
+
