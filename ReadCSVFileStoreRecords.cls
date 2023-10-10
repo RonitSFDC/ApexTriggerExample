@@ -23,3 +23,12 @@ public class CSVReader {
         }
     }
 }
+
+
+public with sharing class CSVFileReader {
+    @AuraEnabled(cacheable=true)
+    public static List<String> readCSVFile(String csvContent) {
+        List<String> csvLines = csvContent.split('\n');
+        return csvLines;
+    }
+}
